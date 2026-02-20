@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Makeup Readiness Checker</title>
+  <meta name="description" content="Makeup durability risk calculator with prep tips by Anjali Makeover." />
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#121924;
+      --muted:#93a4b8;
+      --text:#eaf2ff;
+      --line:#243042;
+      --accent:#5eead4;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --good:#34d399;
+      --btn:#1f2a3a;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(94,234,212,.12), transparent 60%),
+                  radial-gradient(900px 700px at 100% 0%, rgba(251,113,133,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      padding:24px;
+    }
+    .wrap{max-width:980px; margin:0 auto;}
+    header{
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .brand{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      padding:16px 16px 14px;
+      box-shadow: var(--shadow);
+      flex:1;
+    }
+    h1{margin:0 0 6px; font-size:22px; letter-spacing:.2px}
+    .sub{margin:0; color:var(--muted); font-size:13px; line-height:1.35}
+    .top-actions{
+      display:flex; flex-direction:column; gap:10px; min-width:240px;
+    }
+    .btn{
+      appearance:none; border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:12px 14px; border-radius:14px;
+      cursor:pointer; font-weight:600;
+      display:flex; align-items:center; justify-content:center;
+      gap:10px; text-decoration:none;
+    }
+    .btn:hover{border-color: rgba(94,234,212,.40)}
+    .btn.secondary{background: rgba(255,255,255,.04)}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
+    }
+    @media (max-width: 920px){
+      header{flex-direction:column}
+      .top-actions{flex-direction:row; min-width:unset; width:100%}
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      padding:16px;
+      box-shadow: var(--shadow);
+    }
+    .card h2{margin:0 0 10px; font-size:16px}
+    .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
+    @media (max-width:560px){ .row{grid-template-columns:1fr} }
+
+    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
+    select{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(10,14,20,.6);
+      color:var(--text);
+      outline:none;
+    }
+    select:focus{border-color: rgba(94,234,212,.55)}
+    .divider{height:1px; background:rgba(255,255,255,.08); margin:14px 0}
+
+    .scorebox{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(10,14,20,.55);
+    }
+    .score{
+      font-size:34px; font-weight:800; letter-spacing:.4px;
+      line-height:1;
+    }
+    .pill{
+      font-size:12px; font-weight:800;
+      padding:8px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      white-space:nowrap;
+    }
+    .pill.good{border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.10); color: var(--good)}
+    .pill.warn{border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.10); color: var(--warn)}
+    .pill.bad{border-color: rgba(251,113,133,.35); background: rgba(251,113,133,.10); color: var(--bad)}
+
+    .kpi{display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px}
+    @media (max-width:560px){ .kpi{grid-template-columns:1fr} }
+    .kpi .mini{
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(10,14,20,.55);
+    }
+    .mini .t{font-size:12px; color:var(--muted); margin-bottom:4px}
+    .mini .v{font-size:14px; font-weight:700}
+
+    ul{margin:10px 0 0 18px; padding:0}
+    li{margin:7px 0; color: #dbe7ff}
+    .muted{color:var(--muted); font-size:12px; line-height:1.4}
+    .footer-note{margin-top:10px; font-size:12px; color:var(--muted)}
+    .actions{
+      display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;
+    }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(94,234,212,.22), rgba(94,234,212,.08));
+      border-color: rgba(94,234,212,.35);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <h1 id="title">Makeup Readiness Checker</h1>
+        <p class="sub" id="subtitle">
+          A durability risk calculator. Select conditions → get expected duration, prep tips & artist recommendation.
+        </p>
+      </div>
+      <div class="top-actions">
+        <button class="btn secondary" id="langBtn" type="button">हिंदी / English</button>
+        <a class="btn primary" id="waTop" href="#" target="_blank" rel="noopener">
+          Talk to Expert on WhatsApp
+        </a>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- INPUTS -->
+      <section class="card">
+        <h2 id="inputTitle">Inputs</h2>
+
+        <div class="row">
+          <div>
+            <label id="lblVenue" for="venue">Venue</label>
+            <select id="venue">
+              <option value="indoor">Indoor</option>
+              <option value="outdoor">Outdoor</option>
+              <option value="mix">Mix (Indoor + Outdoor)</option>
+            </select>
+          </div>
+
+          <div>
+            <label id="lblSetup" for="setup">Setup</label>
+            <select id="setup">
+              <option value="closed">Closed Hall (AC/closed)</option>
+              <option value="openTent">Open tent / open lawn seating</option>
+              <option value="semiOpen">Semi-open (open sides)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label id="lblTime" for="time">Time</label>
+            <select id="time">
+              <option value="night">Night</option>
+              <option value="day">Day</option>
+              <option value="mix">Mix (Day → Night)</option>
+            </select>
+          </div>
+
+          <div>
+            <label id="lblOutfit" for="outfit">Outfit & friction</label>
+            <select id="outfit">
+              <option value="light">Light (minimal friction)</option>
+              <option value="heavy">Heavy (dupatta/neck friction + jewellery)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label id="lblSweat" for="sweat">Sweating level</label>
+            <select id="sweat">
+              <option value="low">Low</option>
+              <option value="med">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+
+          <div>
+            <label id="lblSkin" for="skin">Skin type</label>
+            <select id="skin">
+              <option value="dry">Dry</option>
+              <option value="normal">Normal</option>
+              <option value="combo">Combination</option>
+              <option value="oily">Oily</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label id="lblLen" for="length">Event length</label>
+            <select id="length">
+              <option value="2to4">2–4 hrs</option>
+              <option value="5to8">5–8 hrs</option>
+              <option value="8plus">8+ hrs</option>
+            </select>
+          </div>
+          <div>
+            <label id="lblOcc" for="occasion">Occasion (optional)</label>
+            <select id="occasion">
+              <option value="party">Party / Guest</option>
+              <option value="engagement">Engagement / Roka</option>
+              <option value="wedding">Wedding / Bridal</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="actions">
+          <button class="btn" id="resetBtn" type="button">Reset</button>
+          <button class="btn primary" id="copyBtn" type="button">Copy result</button>
+          <a class="btn secondary" id="waBtn" href="#" target="_blank" rel="noopener">WhatsApp this result</a>
+        </div>
+
+        <p class="footer-note" id="noteLine">
+          Note: This is an estimate — weather, skin, and products can change results.
+        </p>
+      </section>
+
+      <!-- OUTPUTS -->
+      <aside class="card">
+        <h2 id="outputTitle">Your Result</h2>
+
+        <div class="scorebox">
+          <div>
+            <div class="muted" id="scoreLabel">Durability Score</div>
+            <div class="score" id="score">100</div>
+          </div>
+          <div class="pill good" id="riskPill">Low Risk</div>
+        </div>
+
+        <div class="kpi">
+          <div class="mini">
+            <div class="t" id="durLabel">Expected duration</div>
+            <div class="v" id="duration">8–12 hrs</div>
+          </div>
+          <div class="mini">
+            <div class="t" id="artistLabel">Artist recommendation</div>
+            <div class="v" id="artist">Normal party artist OK</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+          <div class="muted" id="tipsTitle">Prep tips (simple)</div>
+          <ul id="tips"></ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="muted" id="whyLine">
+          Why believable: Heat + sweat + outdoor + friction = makeup breaks faster.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const WA_NUMBER = "919258353131";
+
+  // ----- DEDUCTIONS (exact) -----
+  const D = {
+    venue:   { indoor:0, outdoor:20, mix:10 },
+    setup:   { closed:0, openTent:25, semiOpen:15 },
+    time:    { night:0, day:10, mix:6 },
+    outfit:  { light:0, heavy:10 },
+    sweat:   { low:0, med:15, high:25 },
+    skin:    { dry:0, normal:3, combo:8, oily:15 },
+    length:  { "2to4":0, "5to8":10, "8plus":20 }
+  };
+
+  // ----- UI elements -----
+  const el = (id)=>document.getElementById(id);
+  const inputs = ["venue","setup","time","outfit","sweat","skin","length","occasion"].map(el);
+
+  const scoreEl = el("score");
+  const riskPill = el("riskPill");
+  const durationEl = el("duration");
+  const artistEl = el("artist");
+  const tipsEl = el("tips");
+
+  const waTop = el("waTop");
+  const waBtn = el("waBtn");
+  const copyBtn = el("copyBtn");
+  const resetBtn = el("resetBtn");
+  const langBtn = el("langBtn");
+
+  let lang = "en"; // 'en' or 'hi'
+
+  // ----- Language pack (simple Hindi) -----
+  const T = {
+    en: {
+      title:"Makeup Readiness Checker",
+      subtitle:"A durability risk calculator. Select conditions → get expected duration, prep tips & artist recommendation.",
+      inputTitle:"Inputs",
+      outputTitle:"Your Result",
+      scoreLabel:"Durability Score",
+      durLabel:"Expected duration",
+      artistLabel:"Artist recommendation",
+      tipsTitle:"Prep tips (simple)",
+      noteLine:"Note: This is an estimate — weather, skin, and products can change results.",
+      whyLine:"Why believable: Heat + sweat + outdoor + friction = makeup breaks faster.",
+      talk:"Talk to Expert on WhatsApp",
+      reset:"Reset",
+      copy:"Copy result",
+      waResult:"WhatsApp this result",
+      lblVenue:"Venue",
+      lblSetup:"Setup",
+      lblTime:"Time",
+      lblOutfit:"Outfit & friction",
+      lblSweat:"Sweating level",
+      lblSkin:"Skin type",
+      lblLen:"Event length",
+      lblOcc:"Occasion (optional)",
+      opt:{
+        venue:{ indoor:"Indoor", outdoor:"Outdoor", mix:"Mix (Indoor + Outdoor)" },
+        setup:{ closed:"Closed Hall (AC/closed)", openTent:"Open tent / open lawn seating", semiOpen:"Semi-open (open sides)" },
+        time:{ night:"Night", day:"Day", mix:"Mix (Day → Night)" },
+        outfit:{ light:"Light (minimal friction)", heavy:"Heavy (dupatta/neck friction + jewellery)" },
+        sweat:{ low:"Low", med:"Medium", high:"High" },
+        skin:{ dry:"Dry", normal:"Normal", combo:"Combination", oily:"Oily" },
+        length:{ "2to4":"2–4 hrs", "5to8":"5–8 hrs", "8plus":"8+ hrs" },
+        occasion:{ party:"Party / Guest", engagement:"Engagement / Roka", wedding:"Wedding / Bridal" }
+      },
+      risk:{ low:"Low Risk", med:"Medium Risk", high:"High Risk" },
+      artist:{
+        low:"Normal party artist OK",
+        med:"Experienced artist recommended",
+        high:"Bridal specialist + touch-up plan"
+      }
+    },
+    hi: {
+      title:"मेकअप टिकाऊपन चेक",
+      subtitle:"यह एक टिकाऊपन (durability) चेक है। कंडीशन चुनें → समय, तैयारी टिप्स और आर्टिस्ट सलाह मिलेगी।",
+      inputTitle:"जानकारी भरें",
+      outputTitle:"आपका रिज़ल्ट",
+      scoreLabel:"टिकाऊपन स्कोर",
+      durLabel:"कितने घंटे टिकेगा",
+      artistLabel:"आर्टिस्ट सलाह",
+      tipsTitle:"तैयारी टिप्स (सरल)",
+      noteLine:"नोट: यह एक अनुमान है—weather, skin aur products के हिसाब से रिज़ल्ट बदल सकता है।",
+      whyLine:"क्यों सही लगता है: गर्मी + पसीना + बाहर + रगड़ = मेकअप जल्दी टूटता है।",
+      talk:"WhatsApp पर Expert से बात करें",
+      reset:"रीसेट",
+      copy:"रिज़ल्ट कॉपी करें",
+      waResult:"रिज़ल्ट WhatsApp करें",
+      lblVenue:"जगह (Venue)",
+      lblSetup:"सेटअप",
+      lblTime:"समय",
+      lblOutfit:"ड्रेस/रगड़",
+      lblSweat:"पसीना",
+      lblSkin:"त्वचा प्रकार",
+      lblLen:"इवेंट अवधि",
+      lblOcc:"अवसर (Optional)",
+      opt:{
+        venue:{ indoor:"Indoor (हॉल)", outdoor:"Outdoor (बाहर)", mix:"Mix (दोनों)" },
+        setup:{ closed:"Closed Hall (बंद/AC)", openTent:"Open Tent / Lawn (खुला)", semiOpen:"Semi-open (आधा खुला)" },
+        time:{ night:"रात", day:"दिन", mix:"Mix (दिन + रात)" },
+        outfit:{ light:"हल्की (कम रगड़)", heavy:"भारी (दुपट्टा/गला रगड़)" },
+        sweat:{ low:"कम", med:"मध्यम", high:"ज्यादा" },
+        skin:{ dry:"सूखी", normal:"नॉर्मल", combo:"मिक्स", oily:"ऑयली" },
+        length:{ "2to4":"2–4 घंटे", "5to8":"5–8 घंटे", "8plus":"8+ घंटे" },
+        occasion:{ party:"Party/Guest", engagement:"Engagement/Roka", wedding:"Wedding/Bridal" }
+      },
+      risk:{ low:"कम रिस्क", med:"मध्यम रिस्क", high:"ज्यादा रिस्क" },
+      artist:{
+        low:"Normal party artist OK",
+        med:"Experienced artist बेहतर",
+        high:"Bridal specialist + touch-up plan"
+      }
+    }
+  };
+
+  // ----- Helpers -----
+  const clamp = (n,min,max)=>Math.max(min, Math.min(max,n));
+
+  function calc(){
+    const v = {
+      venue: el("venue").value,
+      setup: el("setup").value,
+      time: el("time").value,
+      outfit: el("outfit").value,
+      sweat: el("sweat").value,
+      skin: el("skin").value,
+      length: el("length").value,
+      occasion: el("occasion").value
+    };
+
+    const deductions =
+      D.venue[v.venue] +
+      D.setup[v.setup] +
+      D.time[v.time] +
+      D.outfit[v.outfit] +
+      D.sweat[v.sweat] +
+      D.skin[v.skin] +
+      D.length[v.length];
+
+    const score = clamp(100 - deductions, 0, 100);
+
+    // Duration mapping
+    let duration = "8–12 hrs";
+    if(score <= 39) duration = "2–4 hrs + touchups needed";
+    else if(score <= 59) duration = "4–6 hrs";
+    else if(score <= 79) duration = "6–8 hrs";
+
+    // Risk label
+    let risk = "low";
+    if(score <= 59) risk = "high";
+    else if(score <= 79) risk = "med";
+
+    // Artist recommendation
+    const artist = T[lang].artist[risk];
+
+    // Tips engine (rule-based)
+    const tips = [];
+    const isOutdoorish = (v.venue === "outdoor" || v.venue === "mix" || v.setup === "openTent" || v.setup === "semiOpen");
+
+    if(v.sweat === "med" || v.sweat === "high"){
+      tips.push(lang==="hi" ? "Oil-control prep करें + loose powder से अच्छे से set करें।" : "Oil-control prep + set well with loose powder.");
+      tips.push(lang==="hi" ? "Waterproof eyeliner/mascara रखें।" : "Use waterproof eyeliner/mascara.");
+      tips.push(lang==="hi" ? "Dewy base avoid करें—long-wear / matte चुनें।" : "Avoid dewy base—choose long-wear/matte.");
+    }
+
+    if(isOutdoorish){
+      tips.push(lang==="hi" ? "Blotting paper + compact साथ रखें।" : "Carry blotting paper + compact powder.");
+      tips.push(lang==="hi" ? "Setting spray जरूरी है।" : "Setting spray is a must.");
+      tips.push(lang==="hi" ? "High-shine look से बचें (break fast होता है)।" : "Avoid high-shine/dewy look (breaks faster).");
+    }
+
+    if(v.time === "day" || v.time === "mix"){
+      tips.push(lang==="hi" ? "Transfer-proof lipstick लें (दिन में ज्यादा टिकता है)।" : "Use transfer-proof lipstick (lasts better in day).");
+      tips.push(lang==="hi" ? "Direct sun कम लें—जहां possible shade में रहें।" : "Avoid direct sun; stay in shade when possible.");
+    }
+
+    if(v.outfit === "heavy"){
+      tips.push(lang==="hi" ? "दुपट्टा/गले की रगड़: jawline/neck area अच्छे से set करें।" : "Neck/dupatta friction: set jawline/neck well.");
+      tips.push(lang==="hi" ? "दुपट्टा pin करें ताकि rubbing कम हो।" : "Pin the dupatta to reduce rubbing.");
+    }
+
+    if(v.skin === "oily" || v.skin === "combo"){
+      tips.push(lang==="hi" ? "T-zone पर mattifying primer लगाएं।" : "Use mattifying primer on T-zone.");
+      tips.push(lang==="hi" ? "Cream products कम रखें और जल्दी set करें।" : "Use fewer cream products; set quickly.");
+    }
+
+    if(v.length === "8plus" || v.length === "5to8"){
+      tips.push(lang==="hi" ? "Touch-up timing plan करें (varmala/डिनर के बाद)।" : "Plan touch-up timing (after varmala / after dinner).");
+      tips.push(lang==="hi" ? "Mini kit: compact + lipstick + blotting." : "Mini kit: compact + lipstick + blotting.");
+    }
+
+    // If no tips (rare), show a default
+    if(tips.length === 0){
+      tips.push(lang==="hi" ? "Basic prep + setting spray के साथ आप safe हैं।" : "You’re safe with basic prep + setting spray.");
+    }
+
+    return {score, risk, duration, artist, tips, v, deductions};
+  }
+
+  function render(){
+    const r = calc();
+
+    scoreEl.textContent = r.score;
+
+    // pill classes
+    riskPill.classList.remove("good","warn","bad");
+    if(r.risk==="low"){ riskPill.classList.add("good"); riskPill.textContent = T[lang].risk.low; }
+    if(r.risk==="med"){ riskPill.classList.add("warn"); riskPill.textContent = T[lang].risk.med; }
+    if(r.risk==="high"){ riskPill.classList.add("bad"); riskPill.textContent = T[lang].risk.high; }
+
+    durationEl.textContent = r.duration;
+    artistEl.textContent = r.artist;
+
+    tipsEl.innerHTML = "";
+    r.tips.forEach(t=>{
+      const li = document.createElement("li");
+      li.textContent = t;
+      tipsEl.appendChild(li);
+    });
+
+    // WhatsApp link with message (result)
+    const msg = buildShareText(r);
+    const waLink = "https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(msg);
+    waTop.href = waLink;
+    waBtn.href = waLink;
+  }
+
+  function buildShareText(r){
+    const L = lang;
+    const label = (en,hi)=> (L==="hi"?hi:en);
+
+    const venueText = getOptionText("venue", r.v.venue);
+    const setupText = getOptionText("setup", r.v.setup);
+    const timeText  = getOptionText("time", r.v.time);
+    const outfitText= getOptionText("outfit", r.v.outfit);
+    const sweatText = getOptionText("sweat", r.v.sweat);
+    const skinText  = getOptionText("skin", r.v.skin);
+    const lenText   = getOptionText("length", r.v.length);
+
+    return [
+      label("Makeup Readiness Checker Result"),
+      "—",
+      label("Score", "Score") + ": " + r.score + "/100",
+      label("Risk", "Risk") + ": " + (r.risk==="low"?T[L].risk.low : r.risk==="med"?T[L].risk.med : T[L].risk.high),
+      label("Expected duration", "Expected duration") + ": " + r.duration,
+      label("Artist", "Artist") + ": " + r.artist,
+      "—",
+      label("Inputs", "Inputs"),
+      label("Venue", "Venue") + ": " + venueText,
+      label("Setup", "Setup") + ": " + setupText,
+      label("Time", "Time") + ": " + timeText,
+      label("Outfit", "Outfit") + ": " + outfitText,
+      label("Sweating", "Sweating") + ": " + sweatText,
+      label("Skin type", "Skin type") + ": " + skinText,
+      label("Event length", "Event length") + ": " + lenText,
+      "—",
+      label("Top tips:", "Top tips:"),
+      "• " + r.tips.slice(0,5).join("\n• "),
+      "—",
+      label("Please guide me as per my event.", "Please guide me as per my event.")
+    ].join("\n");
+  }
+
+  function getOptionText(field, value){
+    const opts = T[lang].opt[field];
+    return opts && opts[value] ? opts[value] : value;
+  }
+
+  function applyLanguage(){
+    const t = T[lang];
+    el("title").textContent = t.title;
+    el("subtitle").textContent = t.subtitle;
+    el("inputTitle").textContent = t.inputTitle;
+    el("outputTitle").textContent = t.outputTitle;
+    el("scoreLabel").textContent = t.scoreLabel;
+    el("durLabel").textContent = t.durLabel;
+    el("artistLabel").textContent = t.artistLabel;
+    el("tipsTitle").textContent = t.tipsTitle;
+    el("noteLine").textContent = t.noteLine;
+    el("whyLine").textContent = t.whyLine;
+
+    el("lblVenue").textContent = t.lblVenue;
+    el("lblSetup").textContent = t.lblSetup;
+    el("lblTime").textContent = t.lblTime;
+    el("lblOutfit").textContent = t.lblOutfit;
+    el("lblSweat").textContent = t.lblSweat;
+    el("lblSkin").textContent = t.lblSkin;
+    el("lblLen").textContent = t.lblLen;
+    el("lblOcc").textContent = t.lblOcc;
+
+    // Buttons
+    waTop.textContent = t.talk;
+    waBtn.textContent = t.waResult;
+    copyBtn.textContent = t.copy;
+    resetBtn.textContent = t.reset;
+
+    // Update option texts (keep values same)
+    setSelectOptions("venue", t.opt.venue);
+    setSelectOptions("setup", t.opt.setup);
+    setSelectOptions("time", t.opt.time);
+    setSelectOptions("outfit", t.opt.outfit);
+    setSelectOptions("sweat", t.opt.sweat);
+    setSelectOptions("skin", t.opt.skin);
+    setSelectOptions("length", t.opt.length);
+    setSelectOptions("occasion", t.opt.occasion);
+
+    render();
+  }
+
+  function setSelectOptions(id, map){
+    const s = el(id);
+    [...s.options].forEach(o=>{
+      if(map[o.value]) o.textContent = map[o.value];
+    });
+  }
+
+  // ----- Events -----
+  inputs.forEach(i => i.addEventListener("change", render));
+
+  resetBtn.addEventListener("click", ()=>{
+    el("venue").value = "indoor";
+    el("setup").value = "closed";
+    el("time").value = "night";
+    el("outfit").value = "light";
+    el("sweat").value = "low";
+    el("skin").value = "dry";
+    el("length").value = "2to4";
+    el("occasion").value = "party";
+    render();
+  });
+
+  copyBtn.addEventListener("click", async ()=>{
+    const r = calc();
+    const text = buildShareText(r);
+    try{
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = (lang==="hi" ? "कॉपी हो गया ✅" : "Copied ✅");
+      setTimeout(()=> copyBtn.textContent = T[lang].copy, 1100);
+    }catch(e){
+      alert(lang==="hi" ? "Copy नहीं हुआ—manual copy करें." : "Copy failed—please copy manually.");
+    }
+  });
+
+  langBtn.addEventListener("click", ()=>{
+    lang = (lang==="en" ? "hi" : "en");
+    applyLanguage();
+  });
+
+  // Init
+  applyLanguage();
+})();
+</script>
+</body>
+</html>
